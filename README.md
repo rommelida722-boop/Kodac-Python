@@ -326,3 +326,16 @@ MIT，见 [LICENSE](LICENSE)。
 ![全量测试输出](docs/screenshots/test-baseline.png)
 
 详见 [项目图文介绍](docs/project-showcase.md) 和 [每期更新记录](CHANGELOG.md)。
+
+
+## 第四期：长任务中的任务线索保留
+
+当前版本为 **0.1.1**，全量测试共 **112 项**。压缩器会抽取并优先保留目标、约束、决定和待办，重复压缩时读取已有条目；近期消息与工具调用组继续保持完整。摘要是历史线索，不能保证所有信息都被保留。
+
+```powershell
+uv run --frozen --extra dev python examples/context_retention.py
+```
+
+![连续五轮压缩验证](docs/screenshots/phase-04-retention.png)
+
+上图来自离线示例的真实输出渲染。完整说明及限制见 [第四期更新记录](docs/releases/phase-04-context-retention.md)。

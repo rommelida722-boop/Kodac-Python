@@ -36,6 +36,8 @@ jobs:
         run: uv sync --frozen --extra dev --python ${{ matrix.python }}
       - name: 执行完整测试集
         run: uv run --frozen --extra dev python -m pytest --junitxml=test-results/pytest.xml
+      - name: 验证连续压缩示例
+        run: uv run --frozen --extra dev python examples/context_retention.py
       - name: 保存测试报告
         if: always()
         uses: actions/upload-artifact@v4
@@ -60,9 +62,9 @@ jobs:
       - name: 安装依赖
         run: uv sync --frozen --extra dev --python 3.12
       - name: 检查代码
-        run: uv run --frozen --extra dev ruff check src tests
+        run: uv run --frozen --extra dev ruff check src tests examples
       - name: 检查格式
-        run: uv run --frozen --extra dev ruff format --check src tests
+        run: uv run --frozen --extra dev ruff format --check src tests examples
       - name: 构建发行包
         run: uv build
       - name: 验证 CLI 入口

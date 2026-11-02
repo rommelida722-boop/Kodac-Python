@@ -49,3 +49,12 @@ GitHub Actions 配置在每次推送后运行全量测试，并覆盖 Windows、
 每期使用独立提交、独立标签与更新记录。已整理的期次参见 [CHANGELOG](../CHANGELOG.md)，本轮测试与 CI 细节参见 [第二期记录](releases/phase-02-ci-baseline.md)。
 
 原仓库继承的许可证和既有项目来源继续保留，新增实现仍然使用 Python。
+
+
+## 第四期新增：重复压缩中的任务线索
+
+0.1.1 版本使用结构化抽取摘要，重点保留目标、约束、决定和待办，并保留来源与历史顺序。全量测试现为 112 项；前文的 98 项结果是第二期历史基线。
+
+![连续五轮压缩验证](screenshots/phase-04-retention.png)
+
+上图来自 `examples/context_retention.py` 的实际输出渲染。该固定样例五轮验证均通过；这不代表所有长任务均不会丢失信息。详情见 [第四期记录](releases/phase-04-context-retention.md)。

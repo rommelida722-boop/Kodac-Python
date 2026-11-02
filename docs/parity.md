@@ -181,3 +181,10 @@ uv run kodac mcp serve --transport http --port 3999
 ### 全量测试与持续集成
 
 98 项本地测试通过；新增用户目录隔离与离线测试占位配置。GitHub Actions 工作流已配置全量测试矩阵、Ruff、打包及 CLI 验证，远端状态以 Actions 为准。每期记录参见 CHANGELOG.md，图文介绍参见 docs/project-showcase.md。
+
+
+### 第四期：长上下文压缩质量（0.1.1）
+
+Python 摘要支持目标、约束、待办、决定等分类抽取、重复压缩解包、去重、来源与历史顺序保留、完整边界及旧版完整摘要兼容。多模态历史抽取文字并省略图片字节。近期消息继续保持原文，预算不足时不保证保留全部历史。
+
+新增 14 项回归用例，全量测试 112 项通过。公开入口集成用例和连续五轮离线示例均通过。详见 `docs/releases/phase-04-context-retention.md`。
