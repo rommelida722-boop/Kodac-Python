@@ -10,3 +10,14 @@
 - 增加两项回归测试，上下文测试合计 7 项。
 - 对应标签：`phase-01-context-integrity`。
 
+## 第二期：全量测试基线与持续集成（2026-11-02）
+
+- 全部 98 项测试通过，覆盖配置、模型协议、上下文、记忆、Skill、规划、团队模式、MCP、Runtime、快照和工具。
+- 每项测试独立隔离 HOME 与 USERPROFILE，兼容 Windows 和 Linux，避免写入真实用户数据库。
+- 离线客户端测试显式提供占位 API Key，不依赖个人配置或真实模型服务。
+- 清理未使用导入、统一代码格式。
+- GitHub Actions 在每次 push、PR 和手动触发时运行全部测试。
+- 测试矩阵：Windows / Linux × Python 3.11 / 3.12 / 3.13；保留 JUnit 报告 30 天。
+- 独立运行 Ruff 检查、格式检查、打包和 CLI 入口验证。
+- 对应标签：`phase-02-ci-baseline`。
+

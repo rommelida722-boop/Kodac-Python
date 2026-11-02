@@ -173,6 +173,11 @@ uv run kodac mcp serve --transport http --port 3999
 ```
 
 
-### 第一期：长上下文完整性
+### 长上下文完整性升级
 
-修复无用户消息历史的工具调用压缩边界，深拷贝嵌套消息数据。上下文回归测试 7 项通过，详见 docs/releases/phase-01-context-integrity.md。
+依据 docs1/phase-12-long-context.md，Python 压缩器在无用户消息时仍保留完整工具调用组，并深拷贝嵌套消息数据，避免污染原始历史。相关上下文回归测试共 7 项通过。
+
+
+### 全量测试与持续集成
+
+98 项本地测试通过；新增用户目录隔离与离线测试占位配置。GitHub Actions 工作流已配置全量测试矩阵、Ruff、打包及 CLI 验证，远端状态以 Actions 为准。每期记录参见 CHANGELOG.md，图文介绍参见 docs/project-showcase.md。

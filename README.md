@@ -313,3 +313,8 @@ MIT，见 [LICENSE](LICENSE)。
 ### 第一期：长上下文完整性
 
 修复无用户消息历史的工具调用压缩边界，深拷贝嵌套消息数据。上下文回归测试 7 项通过，详见 docs/releases/phase-01-context-integrity.md。
+
+
+### 第二期：全量测试与持续集成
+
+全量测试 98 项通过。新增 Windows / Linux 与 Python 3.11—3.13 的 GitHub Actions 测试矩阵，push、PR 和手动触发均执行全部测试。详情参见 docs/releases/phase-02-ci-baseline.md。
