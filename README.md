@@ -1,5 +1,9 @@
 # Kodac
 
+[![全量测试](https://github.com/rommelida722-boop/Kodac-Python/actions/workflows/tests.yml/badge.svg)](https://github.com/rommelida722-boop/Kodac-Python/actions/workflows/tests.yml)
+
+[项目图文介绍](docs/project-showcase.md) · [每期更新记录](CHANGELOG.md) · [测试基线与 CI](docs/releases/phase-02-ci-baseline.md)
+
 Kodac 是一个运行在终端里的 AI Agent CLI。它在当前工作目录中读写文件、搜索代码、执行命令、联网检索、调用 MCP 工具，并维护跨会话的长期记忆；同时通过 Runtime API 把 thread、turn、事件和后台任务暴露给外部系统。
 
 ![Kodac 启动界面](docs/banner.svg)
@@ -310,11 +314,15 @@ uv run kodac --plain -p hello
 MIT，见 [LICENSE](LICENSE)。
 
 
-### 第一期：长上下文完整性
+### 长上下文完整性升级
 
-修复无用户消息历史的工具调用压缩边界，深拷贝嵌套消息数据。上下文回归测试 7 项通过，详见 docs/releases/phase-01-context-integrity.md。
+依据 docs1/phase-12-long-context.md，Python 压缩器在无用户消息时仍保留完整工具调用组，并深拷贝嵌套消息数据，避免污染原始历史。相关上下文回归测试共 7 项通过。
 
 
-### 第二期：全量测试与持续集成
+## 全量测试与分期交付
 
-全量测试 98 项通过。新增 Windows / Linux 与 Python 3.11—3.13 的 GitHub Actions 测试矩阵，push、PR 和手动触发均执行全部测试。详情参见 docs/releases/phase-02-ci-baseline.md。
+本轮本地全量测试为 98 项通过。Windows 与 Linux 的 Python 3.11—3.13 组合由 GitHub Actions 在每次推送、PR 或手动触发时验证，结果以 Actions 页面为准。每期改动通过独立提交、标签和 CHANGELOG 保留。
+
+![全量测试输出](docs/screenshots/test-baseline.png)
+
+详见 [项目图文介绍](docs/project-showcase.md) 和 [每期更新记录](CHANGELOG.md)。
