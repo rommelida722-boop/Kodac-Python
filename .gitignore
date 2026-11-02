@@ -1,0 +1,20 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+.kodac/
+/.playwright-cli
+
+/test-results/
+# 本地参考资料不随产品发布。
+/docs1/

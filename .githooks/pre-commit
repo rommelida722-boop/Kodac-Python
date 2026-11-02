@@ -1,0 +1,30 @@
+#!/bin/sh
+# Reject commits that look like they contain live credentials.
+#
+# Install once per clone with:
+#   git config core.hooksPath .githooks
+#
+# Bypass for a known-safe false positive:
+#   git commit --no-verify
+set -eu
+
+pattern='(sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)'
+
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+
+hits=$(
+    printf '%s\n' "$files" | while IFS= read -r path; do
+        [ -f "$path" ] || continue
+        git show ":$path" | grep -nEI "$pattern" | sed "s|^|$path:|"
+    done || true
+)
+
+if [ -n "$hits" ]; then
+    printf '%s\n' "提交被拒绝：暂存内容里检测到疑似凭据" >&2
+    printf '%s\n' "$hits" >&2
+    printf '%s\n' "确认是假数据的话，用 git commit --no-verify 跳过。" >&2
+    exit 1
+fi
+
+exit 0

@@ -1,0 +1,69 @@
+name: 全量测试
+
+# 所有分支的每次推送均执行，不按文件路径过滤；也支持 PR 和手动运行。
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 全量测试（${{ matrix.os }} / Python ${{ matrix.python }}）
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12', '3.13']
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: 获取代码
+        uses: actions/checkout@v4
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.6'
+          enable-cache: true
+      - name: 安装 Python
+        run: uv python install ${{ matrix.python }}
+      - name: 按锁文件安装项目与测试依赖
+        run: uv sync --frozen --extra dev --python ${{ matrix.python }}
+      - name: 执行完整测试集
+        run: uv run --frozen --extra dev python -m pytest --junitxml=test-results/pytest.xml
+      - name: 保存测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 测试报告-${{ matrix.os }}-py${{ matrix.python }}
+          path: test-results/pytest.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  quality:
+    name: 代码检查与打包
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 获取代码
+        uses: actions/checkout@v4
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.13.6'
+          enable-cache: true
+      - name: 安装依赖
+        run: uv sync --frozen --extra dev --python 3.12
+      - name: 检查代码
+        run: uv run --frozen --extra dev ruff check src tests
+      - name: 检查格式
+        run: uv run --frozen --extra dev ruff format --check src tests
+      - name: 构建发行包
+        run: uv build
+      - name: 验证 CLI 入口
+        run: uv run --frozen --extra dev kodac --version
