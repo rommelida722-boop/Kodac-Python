@@ -189,19 +189,23 @@ class RuntimeApiServer:
             heartbeat_stop = threading.Event()
             heartbeat = threading.Thread(
                 target=self._heartbeat_loop,
-                args=(task.id, worker_id, heartbeat_stop),
+                args=(task.id, worker_id, heartbeat_stop, task.attempts),
                 name=f"kodac-heartbeat-{task.id}",
                 daemon=True,
             )
             heartbeat.start()
             try:
                 result = asyncio.run(self._run_task(task))
-                self.task_manager.complete(task.id, result, worker_id=worker_id)
+                self.task_manager.complete(
+                    task.id, result, worker_id=worker_id, attempt=task.attempts
+                )
             except TaskCanceledError:
                 # cancel() owns the terminal state; never overwrite it from the worker.
                 pass
             except Exception as exc:  # noqa: BLE001
-                self.task_manager.fail(task.id, str(exc), worker_id=worker_id)
+                self.task_manager.fail(
+                    task.id, str(exc), worker_id=worker_id, attempt=task.attempts
+                )
             finally:
                 heartbeat_stop.set()
                 heartbeat.join(timeout=1)
@@ -211,9 +215,12 @@ class RuntimeApiServer:
         task_id: str,
         worker_id: str,
         stop: threading.Event,
+        attempt: int,
     ) -> None:
         while not stop.wait(30):
-            if not self.task_manager.heartbeat(task_id, worker_id, lease_seconds=300):
+            if not self.task_manager.heartbeat(
+                task_id, worker_id, lease_seconds=300, attempt=attempt
+            ):
                 return
 
     async def _run_task(self, task: TaskRecord) -> str:

@@ -117,9 +117,23 @@ class DurableTaskManager:
         finally:
             conn.close()
 
-    def heartbeat(self, task_id: str, worker_id: str, *, lease_seconds: float = 300) -> bool:
+    def heartbeat(
+        self,
+        task_id: str,
+        worker_id: str,
+        *,
+        lease_seconds: float = 300,
+        attempt: int | None = None,
+    ) -> bool:
+        # 命名 Worker 必须提供领取序号，拒绝同名旧轮次续租。
+        if attempt is None and worker_id != "anonymous-worker":
+            return False
         scope_clause = " and scope = ?" if self.scope else ""
-        params: list[str] = [_now(), _future(lease_seconds), task_id, worker_id]
+        now = _now()
+        params = [now, _future(lease_seconds), task_id, worker_id, now]
+        attempt_clause = " and attempts = ?" if attempt is not None else " and attempts = 1"
+        if attempt is not None:
+            params.append(attempt)
         if self.scope:
             params.append(self.scope)
         with self._connect() as conn:
@@ -128,28 +142,35 @@ class DurableTaskManager:
                 update tasks
                 set updated_at = ?, lease_expires_at = ?
                 where id = ? and status = 'running' and worker_id = ?
+                  and lease_expires_at > ? {attempt_clause}
                 {scope_clause}
                 """,
                 params,
             )
             return cursor.rowcount == 1
 
-    def complete(self, task_id: str, result: str, *, worker_id: str | None = None) -> bool:
+    def complete(
+        self, task_id: str, result: str, *, worker_id: str | None = None, attempt: int | None = None
+    ) -> bool:
         return self._finish(
             task_id,
             "completed",
             result=result,
             error=None,
             worker_id=worker_id,
+            attempt=attempt,
         )
 
-    def fail(self, task_id: str, error: str, *, worker_id: str | None = None) -> bool:
+    def fail(
+        self, task_id: str, error: str, *, worker_id: str | None = None, attempt: int | None = None
+    ) -> bool:
         return self._finish(
             task_id,
             "failed",
             result=None,
             error=error,
             worker_id=worker_id,
+            attempt=attempt,
         )
 
     def cancel(self, task_id: str) -> bool:
@@ -231,12 +252,18 @@ class DurableTaskManager:
         result: str | None,
         error: str | None,
         worker_id: str | None,
+        attempt: int | None,
     ) -> bool:
-        owner_clause = " and worker_id = ?" if worker_id else ""
+        if worker_id and attempt is None:
+            return False
+        # 未提供所有者时，仅兼容首次匿名领取；命名 Worker 不能被绕过。
+        owner_clause = " and worker_id = ? and lease_expires_at > ?"
+        attempt_clause = " and attempts = ?" if attempt is not None else " and attempts = 1"
         scope_clause = " and scope = ?" if self.scope else ""
         params: list[str | None] = [status, result, error, _now(), task_id]
-        if worker_id:
-            params.append(worker_id)
+        params.extend([worker_id or "anonymous-worker", _now()])
+        if attempt is not None:
+            params.append(attempt)
         if self.scope:
             params.append(self.scope)
         with self._connect() as conn:
@@ -245,7 +272,7 @@ class DurableTaskManager:
                 update tasks
                 set status = ?, result = ?, error = ?, updated_at = ?,
                     worker_id = null, lease_expires_at = null
-                where id = ? and status = 'running'{owner_clause}
+                where id = ? and status = 'running'{owner_clause}{attempt_clause}
                 {scope_clause}
                 """,
                 params,

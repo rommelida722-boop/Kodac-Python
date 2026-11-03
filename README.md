@@ -339,3 +339,8 @@ uv run --frozen --extra dev python examples/context_retention.py
 ![连续五轮压缩验证](docs/screenshots/phase-04-retention.png)
 
 上图来自离线示例的真实输出渲染。完整说明及限制见 [第四期更新记录](docs/releases/phase-04-context-retention.md)。
+
+
+## 第五期：后台任务可靠性（0.1.2）
+
+本期修复过期 Worker 和同名旧轮次的结果回写问题，Runtime 心跳及完成链路携带领取序号。全量测试 129 项通过，新增 17 项可靠性用例，含 4 个进程竞争 12 个任务的验证。命名 Worker 的 SDK 回写现在必须提供 attempt；详见 [第五期记录](docs/releases/phase-05-task-reliability.md)。

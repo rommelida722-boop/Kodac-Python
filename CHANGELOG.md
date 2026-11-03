@@ -46,3 +46,12 @@
 4. 为当期创建独立标签；以 GitHub Actions 的实际结果确认远端验证状态。
 
 注意：本地 commit 不会触发 GitHub Actions，push 到 GitHub 后才会触发。批量推送多个本地提交通常只产生一次 push 运行，因此分期交付应逐期推送。
+
+
+## 第五期：后台任务可靠性（0.1.2）
+
+- 为心跳、完成与失败回写增加租约有效性和领取序号校验。
+- 修复同名 Worker 旧轮次覆盖及无所有者写入问题，Runtime 同步接入。
+- 新增 17 项回归，全量 129 项通过；跨进程竞争用例为 4 进程、12 任务。
+- 命名 Worker 回写须提供 attempt，兼容性和边界见 docs/releases/phase-05-task-reliability.md。
+- 标签：phase-05-task-reliability。
